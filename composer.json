@@ -1,0 +1,31 @@
+{
+	"name": "dakujem/selectoo",
+	"description": "Select",
+    "keywords": ["utility", "javascript"],
+    "license": "GNU GPL v3",
+	"type": "library",
+	"authors": [
+		{
+			"name": "Andrej Rypák",
+			"email": "xrypak@gmail.com"
+		}
+	],
+	"repositories-foo": [
+		{
+			"type": "vcs",
+			"url": "https://github.com/dakujem/selectoo"
+		}
+	],
+	"require": {
+		"php": "^7.0"
+	},
+	"require-dev": {
+		"nette/tester": "^1.4",
+		"tracy/tracy": "^2.3"
+	},
+	"autoload": {
+		"psr-4": {
+			"Dakujem\\Selectoo\\": "src/"
+		}
+	}
+}
