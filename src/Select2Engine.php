@@ -10,7 +10,7 @@ namespace Dakujem\Selectoo;
  *
  * @author Andrej Rypák (dakujem) <xrypak@gmail.com>
  */
-class Select2Engine implements SelectooEngineInterface
+class Select2Engine implements ScriptEngineInterface
 {
 
 

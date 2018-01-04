@@ -5,12 +5,12 @@ namespace Dakujem\Selectoo;
 
 
 /**
- * SelectooEngineInterface
+ * Selectoo UI Script Engine Interface
  *
  *
  * @author Andrej Rypák (dakujem) <xrypak@gmail.com>
  */
-interface SelectooEngineInterface
+interface ScriptEngineInterface
 {
 
 
