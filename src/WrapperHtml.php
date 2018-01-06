@@ -6,10 +6,19 @@ namespace Dakujem\Selectoo;
 use Nette\Utils\Html as NetteHtml;
 
 
+/**
+ * Simple Html extension
+ * that solves the problem with $input->getControl() returning an input wrapped in another Html instance
+ * and not directly the input/select tag
+ * while using the Nette form macros, namely {input ...} macro.
+ *
+ *
+ * @author Andrej Rypák (dakujem) <xrypak@gmail.com>
+ */
 class WrapperHtml extends NetteHtml
 {
 	/** @var array */
-	private $forwardedElements = [];
+	protected $forwardedElements = [];
 
 
 	public function forwardTo(NetteHtml $element)
