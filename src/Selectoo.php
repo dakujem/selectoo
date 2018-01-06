@@ -48,7 +48,7 @@ class Selectoo extends BaseControl
 	/** @var string|null */
 	public $defaultCssClass = 'selectoo';
 
-	/** @var SelectooEngineInterface|null */
+	/** @var ScriptEngineInterface|null */
 	protected $engine = null;
 
 	/** @var callable|null */
@@ -369,7 +369,7 @@ class Selectoo extends BaseControl
 	 * Set Selectoo engine.
 	 *
 	 *
-	 * @param SelectooEngineInterface|string|callable|null $engine engine instance, factory or class name
+	 * @param ScriptEngineInterface|string|callable|null $engine engine instance, factory or class name
 	 * @return $this
 	 */
 	public function setEngine($engine)
@@ -381,7 +381,7 @@ class Selectoo extends BaseControl
 
 	public function getEngine()
 	{
-		if (!$this->engine instanceof SelectooEngineInterface && is_callable($this->engine)) {
+		if (!$this->engine instanceof ScriptEngineInterface && is_callable($this->engine)) {
 			$this->engine = call_user_func($this->engine, $this);
 			return $this->getEngine();
 		}
@@ -390,7 +390,7 @@ class Selectoo extends BaseControl
 			$this->engine = new $className($this);
 			return $this->getEngine();
 		}
-		if ($this->engine !== null && !$this->engine instanceof SelectooEngineInterface) {
+		if ($this->engine !== null && !$this->engine instanceof ScriptEngineInterface) {
 			throw new InvalidStateException(sprintf('Invalid engine has been set. An instance of %s or the interface-implementing-class-name string or a factory returning those must be set.', ScriptEngineInterface::class));
 		}
 		return $this->engine;
