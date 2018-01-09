@@ -23,21 +23,6 @@ use BadMethodCallException,
  */
 class Selectoo extends BaseControl
 {
-	/** @var array of option / optgroup */
-	protected $options = [];
-
-	/** @var array|null */
-	protected $items = null;
-
-	/** @var array */
-	protected $itemCallback = null;
-
-	/** @var array */
-	protected $optionAttributes = [];
-
-	/** @var mixed */
-	protected $prompt = false;
-
 	/**
 	 * Is in multi-choice select mode?
 	 * In multi-choice mode, values are handled as arrays - setValue expects arrays and arrays are returned from getValue method
@@ -45,11 +30,26 @@ class Selectoo extends BaseControl
 	 */
 	protected $multiChoice = false;
 
+	/** @var array|null */
+	protected $items = null;
+
+	/** @var array */
+	protected $itemCallback = null;
+
+	/** @var array of option / optgroup */
+	protected $options = [];
+
+	/** @var array */
+	protected $optionAttributes = [];
+
+	/** @var mixed */
+	protected $prompt = false;
+
 	/** @var bool */
-	protected $checkAllowedValues = true;
+	protected $validateValuesOnSet = false;
 
 	/** @var string|null */
-	public $defaultCssClass = 'selectoo';
+	protected $defaultCssClass = 'selectoo';
 
 	/** @var ScriptEngineInterface|null */
 	protected $engine = null;
@@ -67,6 +67,7 @@ class Selectoo extends BaseControl
 			$this->setItemCallback($items);
 		} elseif ($items !== null) {
 			$this->setItems($items);
+			$this->validateValuesOnSet(true); // when fixed array of items is provided, validate by default
 		}
 		$this->multiChoice = (bool) $multiChoice;
 		$this->setOption('type', 'select');
@@ -98,7 +99,6 @@ class Selectoo extends BaseControl
 	 */
 	public function setValue($value)
 	{
-		$checkValuesOnSet = $this->checkAllowedValues;
 		if ($this->isMulti()) {
 			if (is_scalar($value) || $value === null) {
 				$value = (array) $value;
@@ -114,30 +114,43 @@ class Selectoo extends BaseControl
 			}
 			$value = array_keys($flip);
 			$this->value = $value;
-			if ($checkValuesOnSet) {
-				$items = $this->getItems();
-				$diff = array_diff($value, array_keys($items));
-				if ($diff) {
-					$set = Strings::truncate(implode(', ', array_map(function ($s) {
-												return var_export($s, true);
-											}, array_keys($items))), 70, '...');
-					$vals = (count($diff) > 1 ? 's' : '') . " '" . implode("', '", $diff) . "'";
-					throw new InvalidArgumentException("Value$vals are out of allowed set [$set] in field '{$this->name}'.");
-				}
-			}
 		} else {
 			$this->value = $value === null ? null : key([(string) $value => null]);
-			if ($checkValuesOnSet) {
-				$items = $this->getItems();
-				if ($value !== null && !array_key_exists((string) $value, $items)) {
-					$set = Strings::truncate(implode(', ', array_map(function ($s) {
-												return var_export($s, true);
-											}, array_keys($items))), 70, '...');
-					throw new InvalidArgumentException("Value '$value' is out of allowed set [$set] in field '{$this->name}'.");
-				}
-			}
+		}
+		if ($this->validateValuesOnSet) {
+			$this->validateValueInOptions($this->value);
 		}
 		return $this;
+	}
+
+
+	/**
+	 * Validates that every selected option (value) is in the array of possible options (items).
+	 *
+	 *
+	 * @param type $value
+	 * @throws InvalidArgumentException
+	 */
+	protected function validateValueInOptions($value)
+	{
+		$items = $this->getItems();
+		if ($this->isMulti()) {
+			$diff = array_diff($value, array_keys($items));
+			if ($diff) {
+				$set = Strings::truncate(implode(', ', array_map(function ($s) {
+											return var_export($s, true);
+										}, array_keys($items))), 70, '...');
+				$vals = (count($diff) > 1 ? 's' : '') . " '" . implode("', '", $diff) . "'";
+				throw new InvalidArgumentException("Value$vals are out of allowed set [$set] in field '{$this->name}'.");
+			}
+		} else {
+			if ($value !== null && !array_key_exists((string) $value, $items)) {
+				$set = Strings::truncate(implode(', ', array_map(function ($s) {
+											return var_export($s, true);
+										}, array_keys($items))), 70, '...');
+				throw new InvalidArgumentException("Value '$value' is out of allowed set [$set] in field '{$this->name}'.");
+			}
+		}
 	}
 
 
@@ -201,6 +214,12 @@ class Selectoo extends BaseControl
 	{
 		$callable = $this->getItemCallback();
 		$this->setItems($callable !== null ? call_user_func($callable, $this->getRawValue(), $this) : []);
+	}
+
+
+	protected function isDormant()
+	{
+		return !$this->isLoaded() && $this->getItemCallback() !== null;
 	}
 
 
@@ -306,6 +325,24 @@ class Selectoo extends BaseControl
 //				}
 //			}
 		}
+	}
+
+
+	/**
+	 * Set flag whether to validate the value when calling setValue.
+	 * When setting a value that is not within the possible options an exception will be thrown.
+	 *
+	 * Note that validating during setValue calls has the side effect of loading items.
+	 * That may cause problems when using dependent inputs because the other inputs might not be loaded yet.
+	 *
+	 *
+	 * @param bool $validate
+	 * @return $this
+	 */
+	public function validateValuesOnSet(bool $validate = true)
+	{
+		$this->validateValuesOnSet = $validate;
+		return $this;
 	}
 
 
