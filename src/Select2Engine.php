@@ -8,38 +8,29 @@ namespace Dakujem\Selectoo;
  * Select2Engine
  *
  * This "engine" produces a UI script that controls the Selectoo select input.
- * It uses the Select2 v4 library.
+ * It is designed for the Select2 library, version 4.0+. But it can be used with other versions as well.
  *
- * For all the options and configuration possibilities, visit the documentation here:
- * @link https://select2.org/ Select2 v4 documentation.
+ * For installation instructions, all the options and configuration possibilities, visit the documentation here:
+ * @link https://select2.org/ - Select2 v4 documentation
+ *
+ *
+ * Examples:
+ *
+ * - 3 equal ways to set "allowClear" and "placeholder" options:
+ *		$engine->allowClear(true, true)->placeholder('This is my placeholder', true);
+ *		$engine->allowClear('"true"')->placeholder('"This is my placeholder"'); // note the quote " characters within the _strings_
+ *		$engine->setOption('allowClear', true, true)->setOption('placeholder', 'This is my placeholder', true);
+ *
+ * - do not escape functions:
+ *		$engine->templateSelection('formatState'); // formatState is a JS function
  *
  *
  * @author Andrej Rypák (dakujem) <xrypak@gmail.com>
  */
 class Select2Engine implements ScriptEngineInterface
 {
-	/**
-	 * All the options are strings or callables in case you want a callable string, use \ as the first character.
-	 * 
-	 * @var string[]|callable[]
-	 */
-	protected $options = [];
 
-
-	/**
-	 * Returns Select2 configuration options.
-	 *
-	 *
-	 * @return string
-	 */
-	protected function getOptionsAsString(): string
-	{
-		$compiled = [];
-		foreach ($this->options as $key => $opt) {
-			$compiled[] = $key . ': ' . (!is_callable($opt) || (is_string($opt) && $opt[0] !== '\\') ? $opt : call_user_func($opt, $key, $this));
-		}
-		return count($compiled) > 0 ? '{' . implode(', ', $compiled) . '}' : '';
-	}
+	use MagicOptionsTrait;
 
 
 	protected function selector($control)
@@ -58,61 +49,6 @@ class Select2Engine implements ScriptEngineInterface
 			})(jQuery);
 		';
 		return $js;
-	}
-
-
-	public function setOption($name, $value, $toJs = false)
-	{
-		if ($toJs) {
-			if ($value === null) {
-				$value = 'null';
-			} elseif (is_bool($value)) {
-				$value = $value ? 'true' : 'false';
-			} elseif (is_numeric($value)) {
-				// nothing changes
-			} else {
-				$value = '"' . $value . '"';
-			}
-		}
-		$this->options[$name] = $value;
-		return $this;
-	}
-
-
-	public function getOption($name)
-	{
-		return $this->options[$name] ?? null;
-	}
-
-
-	public function unsetOption($name)
-	{
-		unset($this->options[$name]);
-		return $this;
-	}
-
-
-	public function __call($name, $arguments)
-	{
-		if (count($arguments) > 0) {
-			return $this->setOption($name, $arguments[0], $arguments[1] ?? false);
-		}
-		if (substr($name, 0, 5) === 'unset') {
-			return $this->unsetOption(lcfirst(substr($name, 5)));
-		}
-		return $this->getOption($name);
-	}
-
-
-	public function __get($name)
-	{
-		return $this->getOption($name);
-	}
-
-
-	public function __set($name, $value)
-	{
-		return $this->setOption($name, $value);
 	}
 
 }
