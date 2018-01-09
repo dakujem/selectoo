@@ -26,8 +26,11 @@ class Selectoo extends BaseControl
 	/** @var array of option / optgroup */
 	protected $options = [];
 
+	/** @var array|null */
+	protected $items = null;
+
 	/** @var array */
-	protected $items = [];
+	protected $itemCallback = null;
 
 	/** @var array */
 	protected $optionAttributes = [];
@@ -58,7 +61,11 @@ class Selectoo extends BaseControl
 	public function __construct($label = null, $items = null, $multiChoice = false)
 	{
 		parent::__construct($label);
-		if ($items !== null) {
+		if (is_callable($items)) {
+			// Note: for some reason, BaseControl calls setValue in constructor... This "reset" is needed for callback loading to work.
+			$this->items = null;
+			$this->setItemCallback($items);
+		} elseif ($items !== null) {
 			$this->setItems($items);
 		}
 		$this->multiChoice = (bool) $multiChoice;
@@ -72,10 +79,11 @@ class Selectoo extends BaseControl
 	 */
 	public function getValue()
 	{
+		$items = $this->getItems();
 		if ($this->isMulti()) {
-			return array_values(array_intersect($this->value, array_keys($this->items)));
+			return array_values(array_intersect($this->value, array_keys($items)));
 		}
-		return array_key_exists($this->value, $this->items) ? $this->value : null;
+		return array_key_exists($this->value, $items) ? $this->value : null;
 	}
 
 
@@ -87,6 +95,7 @@ class Selectoo extends BaseControl
 	 */
 	public function setValue($value)
 	{
+		$items = $this->getItems();
 		if ($this->isMulti()) {
 			if (is_scalar($value) || $value === null) {
 				$value = (array) $value;
@@ -101,19 +110,19 @@ class Selectoo extends BaseControl
 				$flip[(string) $single] = true;
 			}
 			$value = array_keys($flip);
-			if ($this->checkAllowedValues && ($diff = array_diff($value, array_keys($this->items)))) {
+			if ($this->checkAllowedValues && ($diff = array_diff($value, array_keys($items)))) {
 				$set = Strings::truncate(implode(', ', array_map(function ($s) {
 											return var_export($s, true);
-										}, array_keys($this->items))), 70, '...');
+										}, array_keys($items))), 70, '...');
 				$vals = (count($diff) > 1 ? 's' : '') . " '" . implode("', '", $diff) . "'";
 				throw new InvalidArgumentException("Value$vals are out of allowed set [$set] in field '{$this->name}'.");
 			}
 			$this->value = $value;
 		} else {
-			if ($this->checkAllowedValues && $value !== null && !array_key_exists((string) $value, $this->items)) {
+			if ($this->checkAllowedValues && $value !== null && !array_key_exists((string) $value, $items)) {
 				$set = Strings::truncate(implode(', ', array_map(function ($s) {
 											return var_export($s, true);
-										}, array_keys($this->items))), 70, '...');
+										}, array_keys($items))), 70, '...');
 				throw new InvalidArgumentException("Value '$value' is out of allowed set [$set] in field '{$this->name}'.");
 			}
 			$this->value = $value === null ? null : key([(string) $value => null]);
@@ -156,7 +165,56 @@ class Selectoo extends BaseControl
 	 */
 	public function getItems(): array
 	{
+		if (!$this->isLoaded()) {
+			$this->loadItems();
+		}
 		return $this->items;
+	}
+
+
+	public function getOptions()
+	{
+		if (!$this->isLoaded()) {
+			$this->loadItems();
+		}
+		return $this->options;
+	}
+
+
+	protected function isLoaded()
+	{
+		return $this->items !== null;
+	}
+
+
+	protected function loadItems()
+	{
+		$callable = $this->getItemCallback();
+		$this->setItems($callable !== null ? call_user_func($callable, $this) : []);
+	}
+
+
+	/**
+	 * Returns item callback, if set.
+	 * @return callable|null
+	 */
+	public function getItemCallback()
+	{
+		return $this->itemCallback;
+	}
+
+
+	/**
+	 * Set item callback.
+	 * The callback will be used to retrieve items when needed.
+	 *
+	 * @param callable|null $itemCallback
+	 * @return self
+	 */
+	public function setItemCallback(callable $itemCallback = null)
+	{
+		$this->itemCallback = $itemCallback;
+		return $this;
 	}
 
 
@@ -189,7 +247,7 @@ class Selectoo extends BaseControl
 			throw new BadMethodCallException('Cannot call method getSelectedItem in multi-choice mode. Call getSelectedItems instead.');
 		}
 		$value = $this->getValue();
-		return $value === null ? null : $this->items[$value];
+		return $value === null ? null : ($this->getItems()[$value] ?? null);
 	}
 
 
@@ -339,7 +397,7 @@ class Selectoo extends BaseControl
 	public function getControlPart()
 	{
 		$items = $this->prompt === false ? [] : ['' => $this->translate($this->prompt)];
-		foreach ($this->options as $key => $value) {
+		foreach ($this->getOptions() as $key => $value) {
 			$items[is_array($value) ? $this->translate($key) : $key] = $this->translate($value);
 		}
 		$element = Helpers::createSelectBox(
