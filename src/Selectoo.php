@@ -80,10 +80,13 @@ class Selectoo extends BaseControl
 	public function getValue()
 	{
 		$items = $this->getItems();
+		$disabled = $this->disabled;
 		if ($this->isMulti()) {
-			return array_values(array_intersect($this->value, array_keys($items)));
+			$val = array_values(array_intersect($this->value, array_keys($items)));
+			return is_array($disabled) ? array_diff($val, array_keys($disabled)) : $val;
 		}
-		return array_key_exists($this->value, $items) ? $this->value : null;
+		$val = array_key_exists($this->value, $items) ? $this->value : null;
+		return isset($disabled[$val]) ? NULL : $val;
 	}
 
 
@@ -280,18 +283,21 @@ class Selectoo extends BaseControl
 	{
 		if ($this->isMulti()) {
 			$this->value = array_keys(array_flip($this->getHttpData(Form::DATA_TEXT)));
-			if (is_array($this->disabled)) {
-				$this->value = array_diff($this->value, array_keys($this->disabled));
-			}
+//			if (is_array($this->disabled)) {
+//				$this->value = array_diff($this->value, array_keys($this->disabled));
+//			}
 		} else {
-			$this->value = $this->getHttpData(Form::DATA_TEXT);
-			if ($this->value !== null) {
-				if (is_array($this->disabled) && isset($this->disabled[$this->value])) {
-					$this->value = null;
-				} else {
-					$this->value = key([$this->value => null]);
-				}
+			$raw = $this->getHttpData(Form::DATA_TEXT);
+			if ($raw !== null) {
+				$this->value = key(array($raw => null)); // this lousy trick converts numbers to integer, other values to string
 			}
+//			if ($this->value !== null) {
+//				if (is_array($this->disabled) && isset($this->disabled[$this->value])) {
+//					$this->value = null;
+//				} else {
+//					$this->value = key([$this->value => null]);
+//				}
+//			}
 		}
 	}
 
@@ -357,13 +363,13 @@ class Selectoo extends BaseControl
 		parent::setDisabled(false);
 		$this->disabled = array_fill_keys($value, true);
 
-		if (!$this->isMulti()) {
-			if (isset($this->disabled[$this->value])) {
-				$this->value = null;
-			}
-		} else {
-			$this->value = array_diff($this->value, $value);
-		}
+//		if (!$this->isMulti()) {
+//			if (isset($this->disabled[$this->value])) {
+//				$this->value = null;
+//			}
+//		} else {
+//			$this->value = array_diff($this->value, $value);
+//		}
 
 		return $this;
 	}

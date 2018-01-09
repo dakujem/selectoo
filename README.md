@@ -2,6 +2,7 @@
 
 
 - lazy (callback) item loading
+- disabling a Selectoo input does not modify/reset its value, so it can be re-enabled without the loss of the information
 
 
 Ui libraries
