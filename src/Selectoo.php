@@ -98,7 +98,7 @@ class Selectoo extends BaseControl
 	 */
 	public function setValue($value)
 	{
-		$items = $this->getItems();
+		$checkValuesOnSet = $this->checkAllowedValues;
 		if ($this->isMulti()) {
 			if (is_scalar($value) || $value === null) {
 				$value = (array) $value;
@@ -113,22 +113,29 @@ class Selectoo extends BaseControl
 				$flip[(string) $single] = true;
 			}
 			$value = array_keys($flip);
-			if ($this->checkAllowedValues && ($diff = array_diff($value, array_keys($items)))) {
-				$set = Strings::truncate(implode(', ', array_map(function ($s) {
-											return var_export($s, true);
-										}, array_keys($items))), 70, '...');
-				$vals = (count($diff) > 1 ? 's' : '') . " '" . implode("', '", $diff) . "'";
-				throw new InvalidArgumentException("Value$vals are out of allowed set [$set] in field '{$this->name}'.");
-			}
 			$this->value = $value;
-		} else {
-			if ($this->checkAllowedValues && $value !== null && !array_key_exists((string) $value, $items)) {
-				$set = Strings::truncate(implode(', ', array_map(function ($s) {
-											return var_export($s, true);
-										}, array_keys($items))), 70, '...');
-				throw new InvalidArgumentException("Value '$value' is out of allowed set [$set] in field '{$this->name}'.");
+			if ($checkValuesOnSet) {
+				$items = $this->getItems();
+				$diff = array_diff($value, array_keys($items));
+				if ($diff) {
+					$set = Strings::truncate(implode(', ', array_map(function ($s) {
+												return var_export($s, true);
+											}, array_keys($items))), 70, '...');
+					$vals = (count($diff) > 1 ? 's' : '') . " '" . implode("', '", $diff) . "'";
+					throw new InvalidArgumentException("Value$vals are out of allowed set [$set] in field '{$this->name}'.");
+				}
 			}
+		} else {
 			$this->value = $value === null ? null : key([(string) $value => null]);
+			if ($checkValuesOnSet) {
+				$items = $this->getItems();
+				if ($value !== null && !array_key_exists((string) $value, $items)) {
+					$set = Strings::truncate(implode(', ', array_map(function ($s) {
+												return var_export($s, true);
+											}, array_keys($items))), 70, '...');
+					throw new InvalidArgumentException("Value '$value' is out of allowed set [$set] in field '{$this->name}'.");
+				}
+			}
 		}
 		return $this;
 	}
@@ -193,7 +200,7 @@ class Selectoo extends BaseControl
 	protected function loadItems()
 	{
 		$callable = $this->getItemCallback();
-		$this->setItems($callable !== null ? call_user_func($callable, $this) : []);
+		$this->setItems($callable !== null ? call_user_func($callable, $this->getRawValue(), $this) : []);
 	}
 
 
