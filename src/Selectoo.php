@@ -89,6 +89,7 @@ class Selectoo extends BaseControl
 
 	/**
 	 * Returns selected keys.
+	 *
 	 * @return array
 	 */
 	public function getValue()
@@ -106,6 +107,7 @@ class Selectoo extends BaseControl
 
 	/**
 	 * Sets selected items (by keys).
+	 *
 	 * @param  array
 	 * @return static
 	 * @internal
@@ -140,7 +142,6 @@ class Selectoo extends BaseControl
 	/**
 	 * Validates that every selected option (value) is in the array of possible options (items).
 	 *
-	 *
 	 * @param type $value
 	 * @throws InvalidArgumentException
 	 */
@@ -169,6 +170,7 @@ class Selectoo extends BaseControl
 
 	/**
 	 * Sets options and option groups from which to choose.
+	 *
 	 * @return static
 	 */
 	public function setItems(array $items, $useKeys = true)
@@ -197,6 +199,7 @@ class Selectoo extends BaseControl
 
 	/**
 	 * Returns items from which to choose.
+	 *
 	 * @return array
 	 */
 	public function getItems(): array
@@ -238,6 +241,7 @@ class Selectoo extends BaseControl
 
 	/**
 	 * Returns item callback, if set.
+	 *
 	 * @return callable|null
 	 */
 	public function getItemCallback()
@@ -262,6 +266,7 @@ class Selectoo extends BaseControl
 
 	/**
 	 * Returns selected values.
+	 *
 	 * @return array
 	 */
 	public function getSelectedItems(): array
@@ -281,6 +286,7 @@ class Selectoo extends BaseControl
 	/**
 	 * Returns selected value.
 	 * Single-choice mode only.
+	 *
 	 * @return mixed
 	 */
 	public function getSelectedItem()
@@ -295,6 +301,7 @@ class Selectoo extends BaseControl
 
 	/**
 	 * Is any item selected?
+	 *
 	 * @return bool
 	 */
 	public function isFilled()
@@ -306,6 +313,7 @@ class Selectoo extends BaseControl
 
 	/**
 	 * Returns selected key (not checked).
+	 *
 	 * @return string|int|array
 	 */
 	public function getRawValue()
@@ -316,27 +324,18 @@ class Selectoo extends BaseControl
 
 	/**
 	 * Loads HTTP data.
+	 *
 	 * @return void
 	 */
 	public function loadHttpData()
 	{
 		if ($this->isMulti()) {
 			$this->value = array_keys(array_flip($this->getHttpData(Form::DATA_TEXT)));
-//			if (is_array($this->disabled)) {
-//				$this->value = array_diff($this->value, array_keys($this->disabled));
-//			}
 		} else {
 			$raw = $this->getHttpData(Form::DATA_TEXT);
 			if ($raw !== null) {
 				$this->value = key(array($raw => null)); // this lousy trick converts numbers to integer, other values to string
 			}
-//			if ($this->value !== null) {
-//				if (is_array($this->disabled) && isset($this->disabled[$this->value])) {
-//					$this->value = null;
-//				} else {
-//					$this->value = key([$this->value => null]);
-//				}
-//			}
 		}
 	}
 
@@ -347,7 +346,6 @@ class Selectoo extends BaseControl
 	 *
 	 * Note that validating during setValue calls has the side effect of loading items.
 	 * That may cause problems when using dependent inputs because the other inputs might not be loaded yet.
-	 *
 	 *
 	 * @param bool $validate
 	 * @return $this
@@ -371,6 +369,7 @@ class Selectoo extends BaseControl
 
 	/**
 	 * Sets first prompt item in select box.
+	 *
 	 * @param  string|object
 	 * @return static
 	 */
@@ -383,6 +382,7 @@ class Selectoo extends BaseControl
 
 	/**
 	 * Returns first prompt item?
+	 *
 	 * @return mixed
 	 */
 	public function getPrompt()
@@ -391,6 +391,13 @@ class Selectoo extends BaseControl
 	}
 
 
+	/**
+	 * Is the Selectoo input in multi-choice mode?
+	 *
+	 * In multi-choice mode, the values set should be arrays and the values returned will be arrays.
+	 *
+	 * @return bool
+	 */
 	public function isMulti(): bool
 	{
 		return $this->multiChoice;
@@ -399,6 +406,7 @@ class Selectoo extends BaseControl
 
 	/**
 	 * Returns HTML name of control.
+	 *
 	 * @return string
 	 */
 	public function getHtmlName()
@@ -409,6 +417,7 @@ class Selectoo extends BaseControl
 
 	/**
 	 * Disables or enables control or items.
+	 *
 	 * @param  bool|array
 	 * @return static
 	 */
@@ -419,21 +428,13 @@ class Selectoo extends BaseControl
 		}
 		parent::setDisabled(false);
 		$this->disabled = array_fill_keys($value, true);
-
-//		if (!$this->isMulti()) {
-//			if (isset($this->disabled[$this->value])) {
-//				$this->value = null;
-//			}
-//		} else {
-//			$this->value = array_diff($this->value, $value);
-//		}
-
 		return $this;
 	}
 
 
 	/**
 	 * Generates control's HTML element.
+	 *
 	 * @return Html
 	 */
 	public function getControl()
@@ -455,6 +456,8 @@ class Selectoo extends BaseControl
 
 
 	/**
+	 * Return the select part (tag) of the Selectoo input.
+	 *
 	 * @return Html
 	 */
 	public function getControlPart()
@@ -463,11 +466,11 @@ class Selectoo extends BaseControl
 		foreach ($this->getElements() as $key => $value) {
 			$items[is_array($value) ? $this->translate($key) : $key] = $this->translate($value);
 		}
-		$element = Helpers::createSelectBox(
-						$items, [
-					'disabled:' => is_array($this->disabled) ? $this->disabled : null,
-						] + $this->optionAttributes, $this->value
-				)->addAttributes(parent::getControl()->attrs);
+		$parentAttributes = parent::getControl()->attrs;
+		$optionAttributes = [
+			'disabled:' => is_array($this->disabled) ? $this->disabled : null,
+				] + $this->optionAttributes;
+		$element = Helpers::createSelectBox($items, $optionAttributes, $this->value)->addAttributes($parentAttributes);
 		if ($this->isMulti()) {
 			$element->multiple(true);
 		}
@@ -479,6 +482,11 @@ class Selectoo extends BaseControl
 	}
 
 
+	/**
+	 * Return the UI script part (tag) of the Selectoo input.
+	 *
+	 * @return Html|null
+	 */
 	public function getScriptPart()
 	{
 		$content = $this->getEngine() !== null ? $this->getEngine()->getUiScript($this) : null;
@@ -488,7 +496,6 @@ class Selectoo extends BaseControl
 
 	/**
 	 * Set Selectoo engine.
-	 *
 	 *
 	 * @param ScriptEngineInterface|string|callable|null $engine engine instance, factory or class name
 	 * @return $this
@@ -518,6 +525,11 @@ class Selectoo extends BaseControl
 	}
 
 
+	/**
+	 * Return assigned script management routine.
+	 *
+	 * @return callable|null
+	 */
 	public function getScriptManagement()
 	{
 		return $this->scriptManagement;
@@ -534,8 +546,7 @@ class Selectoo extends BaseControl
 	 * This feature can be used for example to gather all scripts generated by inputs and other components
 	 * and then to print them out at the end of the HTML document. The routine should return null in such use cases.
 	 *
-	 *
-	 * @param callable $routine  a function with signature   function($script, $htmlElement, $selectooInput): string|null
+	 * @param callable|null $routine  a function with signature   function($script, $htmlElement, $selectooInput): string|null
 	 * @return self
 	 */
 	public function setScriptManagement(callable $routine = null)
