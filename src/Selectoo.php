@@ -226,6 +226,22 @@ class Selectoo extends BaseControl
 	}
 
 
+	/**
+	 * Unload dynamically loaded items.
+	 *
+	 * Calling this method only makes sense when item callback is set.
+	 *
+	 * @return self
+	 */
+	public function unload()
+	{
+		if ($this->getItemCallback() !== null) {
+			$this->items = null;
+		}
+		return $this;
+	}
+
+
 	protected function loadItems()
 	{
 		$callable = $this->getItemCallback();
