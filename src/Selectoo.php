@@ -73,6 +73,7 @@ class Selectoo extends BaseControl
 
 	public function __construct($label = null, $items = null, $multiChoice = false)
 	{
+		$this->multiChoice = (bool) $multiChoice;
 		parent::__construct($label);
 		if (is_callable($items)) {
 			// Note: for some reason, BaseControl calls setValue in constructor... This "reset" is needed for callback loading to work.
@@ -82,7 +83,6 @@ class Selectoo extends BaseControl
 			$this->setItems($items);
 			$this->validateValuesOnSet(true); // when fixed array of items is provided, validate by default
 		}
-		$this->multiChoice = (bool) $multiChoice;
 		$this->setOption('type', 'select');
 	}
 
