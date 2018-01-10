@@ -30,16 +30,29 @@ class Selectoo extends BaseControl
 	 */
 	protected $multiChoice = false;
 
-	/** @var array|null */
+	/**
+	 * Array of possible values of the input
+	 * @var array|null
+	 */
 	protected $items = null;
 
-	/** @var array */
+	/**
+	 * Callback used for lazy-loading (on demand) of items.
+	 * The use of callback allows for dynamic option loading using ajax.
+	 * @var array
+	 */
 	protected $itemCallback = null;
 
-	/** @var array of option / optgroup */
-	protected $options = [];
+	/**
+	 * Array of child elements that represent HTML tags - option / optgroup
+	 * @var array
+	 */
+	protected $elements = [];
 
-	/** @var array */
+	/**
+	 * Attributes for option elements.
+	 * @var array
+	 */
 	protected $optionAttributes = [];
 
 	/** @var mixed */
@@ -174,7 +187,7 @@ class Selectoo extends BaseControl
 			}
 			$items = $res;
 		}
-		$this->options = $items;
+		$this->elements = $items;
 
 		$flat = Arrays::flatten($items, true);
 		$this->items = $useKeys ? $flat : array_combine($flat, $flat);
@@ -195,12 +208,12 @@ class Selectoo extends BaseControl
 	}
 
 
-	public function getOptions()
+	public function getElements()
 	{
 		if (!$this->isLoaded()) {
 			$this->loadItems();
 		}
-		return $this->options;
+		return $this->elements;
 	}
 
 
@@ -447,7 +460,7 @@ class Selectoo extends BaseControl
 	public function getControlPart()
 	{
 		$items = $this->prompt === false ? [] : ['' => $this->translate($this->prompt)];
-		foreach ($this->getOptions() as $key => $value) {
+		foreach ($this->getElements() as $key => $value) {
 			$items[is_array($value) ? $this->translate($key) : $key] = $this->translate($value);
 		}
 		$element = Helpers::createSelectBox(
