@@ -2,7 +2,7 @@
 
 SelectBox & MultiSelectBox hybrid input with lazy & asynchronous options loading capabilities to be used with Select2, Selectize, Chosen and similar UI libraries.
 
-The Aim of Slectoo is to be reusable and flexible.
+The aim of Slectoo is to provide a flexible tool for creating reusable select inputs.
 
 
 ## Features
