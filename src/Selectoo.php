@@ -295,7 +295,7 @@ class Selectoo extends BaseControl
 	 *
 	 * @return bool
 	 */
-	public function isFilled()
+	public function isFilled():bool
 	{
 		$v = $this->getValue();
 		return $v !== [] && $v !== null;
@@ -331,7 +331,7 @@ class Selectoo extends BaseControl
 	 *
 	 * @return string
 	 */
-	public function getHtmlName()
+	public function getHtmlName():string
 	{
 		return parent::getHtmlName() . ($this->isMulti() ? '[]' : '');
 	}
@@ -393,7 +393,7 @@ class Selectoo extends BaseControl
 	 *
 	 * @return Html
 	 */
-	public function getControlPart()
+	public function getControlPart(): ?Html
 	{
 		$prompt = $this->getPrompt();
 		$items = $prompt === false ? [] : ['' => $this->translate($prompt)];
@@ -660,7 +660,7 @@ class Selectoo extends BaseControl
 	 *
 	 * @return void
 	 */
-	public function loadHttpData()
+	public function loadHttpData():void
 	{
 		if ($this->isMulti()) {
 			$this->value = array_keys(array_flip($this->getHttpData(Form::DATA_TEXT)));
