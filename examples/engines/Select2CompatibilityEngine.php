@@ -1,11 +1,11 @@
 <?php
 
 
-namespace Dakujem\Selectoo;
+namespace Dakujem\Selectoo\Examples;
 
 
 /**
- * Select2Engine in Compatibility mode
+ * Example Select2Engine in compatibility mode
  * that enables to use Select2 in version v4 with an older version (v3.5 for example).
  *
  * For this to work, you need to load the scripts in a special way to assigne Select2 v4 function to a variable, see resource below.
