@@ -14,10 +14,11 @@ namespace Dakujem\Selectoo\Examples;
  */
 class Dkj_UserSelectooFactory
 {
+	/** @var Dkj_UserRepository	 */
 	private $userRepository;
 
 
-	public function __construct($userRepository)
+	public function __construct(Dkj_UserRepository $userRepository)
 	{
 		$this->userRepository = $userRepository;
 	}
@@ -26,7 +27,7 @@ class Dkj_UserSelectooFactory
 	public function create($label = null)
 	{
 		$input = new Selectoo($label ?? 'User', function() {
-			return $this->userRepository->fetchAllUsers(); // returns pairs [ id => name ]
+			return $this->userRepository->fetchUsers(); // returns pairs [ id => name ]
 		}, false);
 
 		$engine = new Select2Engine();

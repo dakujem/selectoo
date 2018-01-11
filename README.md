@@ -13,13 +13,13 @@ The Aim of Slectoo is to be reusable and flexible.
 - on-demand (lazy) loading of options using a callback
 	- options can be loaded asynchronously using AJAX
 	- options are only loaded when really needed
-- can be skinned with other UI libraries or custom scripts (see below)
+- can be skinned with UI libraries or custom scripts (see below)
 - dependent / cascading inputs
 
 
 ## Notable differences compared to Nette SelectBox & MultiSelectBox
 
-- lazy (callback) options loading
+- lazy options loading using a callback
 - disabling a Selectoo input does not modify/reset its value, so it can be re-enabled without the loss of the information
 
 
@@ -69,7 +69,7 @@ For best reusability I strongly encourage using factories for inputs with more l
 typically these involve fetching data from storage or external resources along with JS/UI configuration,
 handling events and value validation.
 
-See examples:
+See simple examples:
 - [general selectoo factory](examples/factories/Select2SelectooFactory.php)
 - [example user select factory](examples/factories/UserSelectooFactory.php)
 - [example AJAX API loaded input](examples/ajax/UserAjaxSelectooFactory.php)
