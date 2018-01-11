@@ -8,15 +8,13 @@ namespace Dakujem\Selectoo;
  * Select2Engine in Compatibility mode
  * that enables to use Select2 in version v4 with an older version (v3.5 for example).
  *
- * For this to work, you need to load the scripts in a special way:
- *
- * Source:
- * @link https://stackoverflow.com/questions/33962395/select2-multiple-versions-on-same-page-site
+ * For this to work, you need to load the scripts in a special way to assigne Select2 v4 function to a variable, see resource below.
+ * @link https://stackoverflow.com/questions/33962395/select2-multiple-versions-on-same-page-site (Source)
  *
  *
  * @author Andrej Rypák (dakujem) <xrypak@gmail.com>
  */
-class Select2CompatibilityEngine extends Select2Engine
+class Dkj_Select2CompatibilityEngine extends Select2Engine
 {
 	protected $varName = 'select2v4';
 
