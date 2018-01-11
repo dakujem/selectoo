@@ -132,7 +132,7 @@ class Selectoo extends BaseControl
 		} else {
 			$this->value = $value === null ? null : key([(string) $value => null]);
 		}
-		if ($this->validateValuesOnSet) {
+		if ($this->validateValuesOnSet && $this->value !== [] && $this->value !== null) {
 			$this->validateValueInOptions($this->value);
 		}
 		return $this;
@@ -329,6 +329,8 @@ class Selectoo extends BaseControl
 
 	/**
 	 * Returns selected key (not checked).
+	 *
+	 * Note that the result of this call is NOT SAFE to use because the input can have ANY raw value!
 	 *
 	 * @return string|int|array
 	 */
