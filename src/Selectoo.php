@@ -71,14 +71,21 @@ class Selectoo extends BaseControl
 	protected $scriptManagement = null;
 
 
+	/**
+	 * Selectoo - flexible select input.
+	 *
+	 * @param string|null $label
+	 * @param array|callable|null $items pass a callable for lazy options loading
+	 * @param bool $multiChoice the mode of operation of the input
+	 */
 	public function __construct($label = null, $items = null, $multiChoice = false)
 	{
 		$this->multiChoice = (bool) $multiChoice;
 		parent::__construct($label);
 		if (is_callable($items)) {
-			// Note: for some reason, BaseControl calls setValue in constructor... This "reset" is needed for callback loading to work.
-			$this->items = null;
 			$this->setItemCallback($items);
+			// Note: for some reason, BaseControl calls setValue in constructor... This "reset" is needed for callback loading to work.
+			$this->unload();
 		} elseif ($items !== null) {
 			$this->setItems($items);
 			$this->validateValuesOnSet(true); // when fixed array of items is provided, validate by default
@@ -88,9 +95,9 @@ class Selectoo extends BaseControl
 
 
 	/**
-	 * Returns selected keys.
+	 * Returns selected key or keys, depending.
 	 *
-	 * @return array
+	 * @return string|int|array returns array in multi-choice mode, int or string in single-choice mode
 	 */
 	public function getValue()
 	{
@@ -108,9 +115,10 @@ class Selectoo extends BaseControl
 	/**
 	 * Sets selected items (by keys).
 	 *
-	 * @param  array
-	 * @return static
-	 * @internal
+	 * Note: it is preferable to use setDefaultValue to set initial value of the input instead
+	 *
+	 * @param string|int|array $value a scalar value in single-choice mode, an array in multi-choice mode
+	 * @return self
 	 */
 	public function setValue($value)
 	{
@@ -142,7 +150,8 @@ class Selectoo extends BaseControl
 	/**
 	 * Validates that every selected option (value) is in the array of possible options (items).
 	 *
-	 * @param type $value
+	 * @param int|string|array $value
+	 * @return self
 	 * @throws InvalidArgumentException
 	 */
 	protected function validateValueInOptions($value)
@@ -165,6 +174,7 @@ class Selectoo extends BaseControl
 				throw new InvalidArgumentException("Value '$value' is out of allowed set [$set] in field '{$this->name}'.");
 			}
 		}
+		return $this;
 	}
 
 
@@ -198,38 +208,44 @@ class Selectoo extends BaseControl
 
 
 	/**
-	 * Returns items from which to choose.
+	 * Get an array of all possible values that represent the items from which to choose.
 	 *
 	 * @return array
 	 */
 	public function getItems(): array
 	{
-		if (!$this->isLoaded()) {
-			$this->loadItems();
-		}
+		!$this->isLoaded() && $this->reload();
 		return $this->items;
 	}
 
 
-	public function getElements()
+	/**
+	 * Get an array of structured child elements that represent HTML tags - option / optgroup
+	 *
+	 * @return array
+	 */
+	public function getElements(): array
 	{
-		if (!$this->isLoaded()) {
-			$this->loadItems();
-		}
+		!$this->isLoaded() && $this->reload();
 		return $this->elements;
 	}
 
 
-	protected function isLoaded()
+	/**
+	 * Have the items/elements been loaded?
+	 *
+	 * @return bool
+	 */
+	protected function isLoaded(): bool
 	{
 		return $this->items !== null;
 	}
 
 
 	/**
-	 * Unload dynamically loaded items.
+	 * Unload dynamically loaded items. Use this method to force reloading the items.
 	 *
-	 * Calling this method only makes sense when item callback is set.
+	 * Calling this method only makes sense when item callback is set. Has no effect otherwise.
 	 *
 	 * @return self
 	 */
@@ -242,14 +258,26 @@ class Selectoo extends BaseControl
 	}
 
 
-	protected function loadItems()
+	/**
+	 * Load dynamic items and elements.
+	 * Note that when no callback is set, it resets items to empty array.
+	 *
+	 * @return self
+	 */
+	protected function reload()
 	{
 		$callable = $this->getItemCallback();
 		$this->setItems($callable !== null ? call_user_func($callable, $this->getRawValue(), $this) : []);
+		return $this;
 	}
 
 
-	protected function isDormant()
+	/**
+	 * Will the items be loaded later when needed?
+	 *
+	 * @return bool
+	 */
+	protected function isDormant(): bool
 	{
 		return !$this->isLoaded() && $this->getItemCallback() !== null;
 	}
@@ -332,7 +360,7 @@ class Selectoo extends BaseControl
 	 *
 	 * Note that the result of this call is NOT SAFE to use because the input can have ANY raw value!
 	 *
-	 * @return string|int|array
+	 * @return string|int|array returns array in multi-choice mode, int or string on single-choice mode
 	 */
 	public function getRawValue()
 	{
@@ -366,7 +394,7 @@ class Selectoo extends BaseControl
 	 * That may cause problems when using dependent inputs because the other inputs might not be loaded yet.
 	 *
 	 * @param bool $validate
-	 * @return $this
+	 * @return self
 	 */
 	public function validateValuesOnSet(bool $validate = true)
 	{
@@ -376,7 +404,7 @@ class Selectoo extends BaseControl
 
 
 	/**
-	 * @return static
+	 * @return self
 	 */
 	public function addOptionAttributes(array $attributes)
 	{
@@ -389,7 +417,7 @@ class Selectoo extends BaseControl
 	 * Sets first prompt item in select box.
 	 *
 	 * @param  string|object
-	 * @return static
+	 * @return self
 	 */
 	public function setPrompt($prompt)
 	{
@@ -412,9 +440,10 @@ class Selectoo extends BaseControl
 	/**
 	 * Is the Selectoo input in multi-choice mode?
 	 *
-	 * In multi-choice mode, the values set should be arrays and the values returned will be arrays.
+	 * In multi-choice mode,  array  values are expected and returned.
+	 * In single-choice mode, scalar values are expected and returned.
 	 *
-	 * @return bool
+	 * @return bool true when in multi-choice mode
 	 */
 	public function isMulti(): bool
 	{
@@ -437,7 +466,7 @@ class Selectoo extends BaseControl
 	 * Disables or enables control or items.
 	 *
 	 * @param  bool|array
-	 * @return static
+	 * @return self
 	 */
 	public function setDisabled($value = true)
 	{
@@ -513,10 +542,10 @@ class Selectoo extends BaseControl
 
 
 	/**
-	 * Set Selectoo engine.
+	 * Set Selectoo UI script engine.
 	 *
 	 * @param ScriptEngineInterface|string|callable|null $engine engine instance, factory or class name
-	 * @return $this
+	 * @return self
 	 */
 	public function setEngine($engine)
 	{
@@ -525,6 +554,12 @@ class Selectoo extends BaseControl
 	}
 
 
+	/**
+	 * Get assigned Selectoo UI script engine instance.
+	 *
+	 * @return ScriptEngineInterface|null
+	 * @throws InvalidStateException
+	 */
 	public function getEngine()
 	{
 		if (!$this->engine instanceof ScriptEngineInterface && is_callable($this->engine)) {
