@@ -1,5 +1,8 @@
 # Selectoo
 
+[![PHP from Packagist](https://img.shields.io/packagist/php-v/dakujem/selectoo.svg)]()
+
+
 SelectBox & MultiSelectBox hybrid input with lazy & asynchronous options loading capabilities to be used with Select2, Selectize, Chosen and similar UI libraries.
 
 The aim of Slectoo is to provide a flexible tool for creating reusable select inputs.
