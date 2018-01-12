@@ -11,10 +11,8 @@
 		}
 	],
 	"require": {
-		"php": "^7.0"
-	},
-	"suggest": {
-		"nette/forms": "Selectoo needs nette/forms to run. Tested with version ^2.4"
+		"php": "^7.0",
+		"nette/forms": "^2.4"
 	},
 	"autoload": {
 		"psr-4": {
