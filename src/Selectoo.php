@@ -15,8 +15,11 @@ use BadMethodCallException,
 
 
 /**
- * Selectoo
- * - hybrid select and multiselect input allowing to attach an engine to generate UI script for the input
+ * Selectoo - flexible select input
+ *
+ * - hybrid select and multiselect input
+ * - allows attachment of "engines" to generate customized UI scripts for the input
+ * - encourages usage of factories to create reusable application select inputs
  *
  *
  * @author Andrej Rypák (dakujem) <xrypak@gmail.com>
@@ -151,7 +154,7 @@ class Selectoo extends BaseControl
 	public function getValue()
 	{
 		$items = $this->getItems();
-		$disabled = $this->disabled;
+		$disabled = $this->getDisabled();
 		if ($this->isMulti()) {
 			$val = array_values(array_intersect($this->value, array_keys($items)));
 			return is_array($disabled) ? array_diff($val, array_keys($disabled)) : $val;
@@ -352,12 +355,13 @@ class Selectoo extends BaseControl
 
 
 	/**
-	 * @return self
+	 * Discover whether the input is disabled, enabled or partially disabled.
+	 *
+	 * @return bool|array bool indicates that the whole input is/is not disabled; array indicates disabled values (partially disabled input)
 	 */
-	public function addOptionAttributes(array $attributes)
+	public function getDisabled()
 	{
-		$this->optionAttributes = $attributes + $this->optionAttributes;
-		return $this;
+		return $this->disabled;
 	}
 
 
@@ -391,20 +395,22 @@ class Selectoo extends BaseControl
 	 */
 	public function getControlPart()
 	{
-		$items = $this->prompt === false ? [] : ['' => $this->translate($this->prompt)];
+		$prompt = $this->getPrompt();
+		$items = $prompt === false ? [] : ['' => $this->translate($prompt)];
 		foreach ($this->getElements() as $key => $value) {
 			$items[is_array($value) ? $this->translate($key) : $key] = $this->translate($value);
 		}
+		$disabled = $this->getDisabled();
 		$parentAttributes = parent::getControl()->attrs;
 		$optionAttributes = [
-			'disabled:' => is_array($this->disabled) ? $this->disabled : null,
+			'disabled:' => is_array($disabled) ? $disabled : null,
 				] + $this->optionAttributes;
-		$element = Helpers::createSelectBox($items, $optionAttributes, $this->value)->addAttributes($parentAttributes);
+		$element = Helpers::createSelectBox($items, $optionAttributes, $this->getRawValue())->addAttributes($parentAttributes);
 		if ($this->isMulti()) {
 			$element->multiple(true);
 		}
-		if ($this->defaultCssClass !== null) {
-			$element->class(($element->class ? $element->class . ' ' : '') . $this->defaultCssClass);
+		if ($this->getDefaultCssClass() !== null) {
+			$element->class(($element->class ? $element->class . ' ' : '') . $this->getDefaultCssClass());
 		}
 		return $element;
 	}
@@ -487,6 +493,65 @@ class Selectoo extends BaseControl
 	public function getScriptManagement()
 	{
 		return $this->scriptManagement;
+	}
+
+
+	/**
+	 * Add attributes for option HTML tags.
+	 *
+	 * @return self
+	 */
+	public function addOptionAttributes(array $attributes)
+	{
+		$this->optionAttributes = $attributes + $this->optionAttributes;
+		return $this;
+	}
+
+
+	/**
+	 * Set attributes for option HTML tags.
+	 *
+	 * @return self
+	 */
+	public function setOptionAttributes(array $attributes)
+	{
+		$this->optionAttributes = $attributes;
+		return $this;
+	}
+
+
+	/**
+	 * Get attributes for option HTML tags.
+	 *
+	 * @return array
+	 */
+	public function getOptionAttributes(): array
+	{
+		return $this->optionAttributes;
+	}
+
+
+	/**
+	 * Set the default CSS class that is added to the base element.
+	 *
+	 * @param string|null $defaultCssClass
+	 * @return self
+	 */
+	public function setDefaultCssClass($defaultCssClass)
+	{
+		$this->defaultCssClass = $defaultCssClass;
+		return $this;
+	}
+
+
+	/**
+	 * Get the default CSS class that is added to the base element.
+	 *
+	 * @return string|null
+	 */
+	public function getDefaultCssClass()
+	{
+		return $this->defaultCssClass;
 	}
 
 
@@ -608,6 +673,9 @@ class Selectoo extends BaseControl
 	}
 
 
+	/**
+	 * Performs deep cloning - engine gets cloned as well.
+	 */
 	public function __clone()
 	{
 		parent::__clone();
