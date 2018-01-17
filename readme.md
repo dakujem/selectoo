@@ -29,6 +29,8 @@ The aim of Selectoo is to provide a flexible tool for creating reusable select i
 - custom ui script for altering the DOM upon selection
 - cascading / dependent inputs
 
+> See included examples for more information.
+
 
 ## Configuring Selectoo input
 
@@ -60,7 +62,7 @@ $input->getEngine()
 ```
 
 The `Select2Engine` is configured using magic options (or `setOption` method).
-The names of the magic methods (or option names) represent the ***Select2* configuration options**.
+The names of the magic methods (or option names) represent the **Select2 configuration options**.
 
 
 ## Lazy options loading & AJAX
@@ -141,6 +143,11 @@ What is needed, in general:
 By following these steps, dependent Selectoo inputs can be created and values validated.
 
 
+## Examples
+
+Please see the examples included in the repository to get a better understanding of when Selectoo comes handy.
+
+
 ## Notable differences compared to Nette SelectBox & MultiSelectBox
 
 - disabling a Selectoo input does not modify/reset its value, so it can be re-enabled without the loss of the information
@@ -153,5 +160,3 @@ By following these steps, dependent Selectoo inputs can be created and values va
 - `nette/forms` v `2.4` and above
 
 You also need **Select2** version `4` to use the `Select2Engine`, see [Select2 documentation](https://select2.org/).
-
-
