@@ -156,7 +156,14 @@ Please see the examples included in the repository to get a better understanding
 
 ## Requirements
 
-- PHP 7+
-- `nette/forms` v `2.4` and above
+| Selectoo | PHP | Nette forms |
+|:---------|:----|:------------|
+| version `2.0` | `7.1+` | `3.*` |
+| version `1.0` | `7.0+` | `2.4.*` |
 
-You also need **Select2** version `4` to use the `Select2Engine`, see [Select2 documentation](https://select2.org/).
+You should also install **Select2** version `4` to use the `Select2Engine`,
+see [Select2 documentation](https://select2.org/).
+
+You may install any other select input "skin" and implement your own engine for it within minutes.
+
+Selectoo can also be used without such a "skin".
