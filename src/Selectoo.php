@@ -410,7 +410,7 @@ class Selectoo extends BaseControl
 			$element->multiple(true);
 		}
 		if ($this->getDefaultCssClass() !== null) {
-			$element->class(($element->class ? $element->class . ' ' : '') . $this->getDefaultCssClass());
+			$element->addClass($this->getDefaultCssClass());
 		}
 		return $element;
 	}
