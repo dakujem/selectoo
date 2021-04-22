@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Dakujem\Selectoo;
-
 
 /**
  * Select2Engine
@@ -17,38 +15,34 @@ namespace Dakujem\Selectoo;
  * Examples:
  *
  * - 3 equal ways to set "allowClear" and "placeholder" options:
- *		$engine->allowClear(true, true)->placeholder('This is my placeholder', true);
- *		$engine->allowClear('"true"')->placeholder('"This is my placeholder"'); // note the quote " characters within the _strings_
- *		$engine->setOption('allowClear', true, true)->setOption('placeholder', 'This is my placeholder', true);
+ *        $engine->allowClear(true, true)->placeholder('This is my placeholder', true);
+ *        $engine->allowClear('"true"')->placeholder('"This is my placeholder"'); // note the quote " characters within the _strings_
+ *        $engine->setOption('allowClear', true, true)->setOption('placeholder', 'This is my placeholder', true);
  *
  * - do not escape functions:
- *		$engine->templateSelection('formatState'); // formatState is a JS function
+ *        $engine->templateSelection('formatState'); // formatState is a JS function
  *
  *
  * @author Andrej Rypák (dakujem) <xrypak@gmail.com>
  */
 class Select2Engine implements ScriptEngineInterface
 {
+    use MagicOptionsTrait;
 
-	use MagicOptionsTrait;
+    protected function selector($control)
+    {
+        return '$(\'#' . $control->getHtmlId() . '\')';
+    }
 
-
-	protected function selector($control)
-	{
-		return '$(\'#' . $control->getHtmlId() . '\')';
-	}
-
-
-	public function getUiScript($control)
-	{
-		$js = '
+    public function getUiScript($control)
+    {
+        $js = '
 			(function($){
 				$(document).ready(function(){
 					' . $this->selector($control) . '.select2(' . $this->getOptionsAsString() . ');
 				});
 			})(jQuery);
 		';
-		return $js;
-	}
-
+        return $js;
+    }
 }
