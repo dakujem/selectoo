@@ -109,4 +109,14 @@ trait MagicOptionsTrait
     {
         return $this->setOption($name, $value);
     }
+
+    public function __isset($name)
+    {
+        return $this->getOption($name) !== null;
+    }
+
+    public function __unset($name)
+    {
+        $this->setOption($name, null);
+    }
 }
