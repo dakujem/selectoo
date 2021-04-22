@@ -2,7 +2,7 @@
   "name": "dakujem/selectoo",
   "description": "SelectBox & MultiSelectBox hybrid input with lazy & asynchronous options loading capabilities to be used with Select2, Selectize, Chosen and similar UI libraries.",
   "keywords": ["forms", "nette", "javascript", "autocomplete"],
-  "license": ["BSD-2-Clause", "MIT", "GPL-3.0-or-later", "GPL-2.0-or-later"],
+  "license": "Unlicense",
   "type": "library",
   "authors": [
     {
