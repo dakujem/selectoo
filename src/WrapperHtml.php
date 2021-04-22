@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Dakujem\Selectoo;
 
 use Nette\Utils\Html as NetteHtml;
