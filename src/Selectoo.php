@@ -228,7 +228,7 @@ class Selectoo extends BaseControl
      * @param callable|null $itemCallback
      * @return self
      */
-    public function setItemCallback(callable $itemCallback = null)
+    public function setItemCallback(?callable $itemCallback = null)
     {
         $this->itemCallback = $itemCallback;
         return $this;
@@ -454,7 +454,7 @@ class Selectoo extends BaseControl
      * @param callable|null $routine a function with signature   function($script, $htmlElement, $selectooInput): string|null
      * @return self
      */
-    public function setScriptManagement(callable $routine = null)
+    public function setScriptManagement(?callable $routine = null)
     {
         $this->scriptManagement = $routine;
         return $this;
