@@ -37,7 +37,7 @@ class WrapperHtml extends NetteHtml
         return $this;
     }
 
-    public function addAttributes(array $attrs)
+    public function addAttributes(array $attrs): static
     {
         foreach ($this->getForwardedElements() as $element) {
             $element->addAttributes($attrs);
